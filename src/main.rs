@@ -109,92 +109,75 @@ fn run_app<B: Backend>(
 
         if let Key(key) = event::read()? {
             match state.mode {
-                InputMode::Normal => {
-                    match key.code {
-                        KeyCode::Char('q') => {
-                            return Ok(());
-                        }
-                        KeyCode::Char('s') => {
-                            // search mode
-                        }
-                        KeyCode::Char('l') => {
-                            // list mode
-                        }
-                        KeyCode::Insert => {
-                            // insert mode
-                        }
-                        _ => {}
+                InputMode::Normal => match key.code {
+                    KeyCode::Char('q') => {
+                        return Ok(());
                     }
-                }
+                    KeyCode::Char('s') => state.change_mode(InputMode::Search),
+                    KeyCode::Char('l') => state.change_mode(InputMode::List),
+                    KeyCode::Insert => state.change_mode(InputMode::Username),
+                    _ => {}
+                },
 
-                InputMode::Title => {
-                    match key.code {
-                        KeyCode::Esc => {
-                            // exit from Title to Normal mode
-                        }
-                        KeyCode::Char(c) => state.new_title.push(c),
-                        KeyCode::Backspace => {
-                            state.new_title.pop();
-                        }
-                        _ => {}
+                InputMode::Title => match key.code {
+                    KeyCode::Esc => {
+                        state.clear_fields();
+                        state.change_mode(InputMode::Normal)
                     }
-                }
+                    KeyCode::Char(c) => state.new_title.push(c),
+                    KeyCode::Backspace => {
+                        state.new_title.pop();
+                    }
+                    KeyCode::Tab => state.change_mode(InputMode::Username),
+                    _ => {}
+                },
 
-                InputMode::Username => {
-                    match key.code {
-                        KeyCode::Esc => {
-                            // exit from Title to Normal mode
-                        }
-                        KeyCode::Char(c) => state.new_username.push(c),
-                        KeyCode::Backspace => {
-                            state.new_username.pop();
-                        }
-                        _ => {}
+                InputMode::Username => match key.code {
+                    KeyCode::Esc => {
+                        state.clear_fields();
+                        state.change_mode(InputMode::Normal)
                     }
-                }
+                    KeyCode::Char(c) => state.new_username.push(c),
+                    KeyCode::Backspace => {
+                        state.new_username.pop();
+                    }
+                    KeyCode::Tab => state.change_mode(InputMode::Password),
+                    KeyCode::BackTab => state.change_mode(InputMode::Title),
+                    _ => {}
+                },
 
-                InputMode::Password => {
-                    match key.code {
-                        KeyCode::Esc => {
-                            // exit from Title to Normal mode
-                        }
-                        KeyCode::Char(c) => state.new_password.push(c),
-                        KeyCode::Backspace => {
-                            state.new_password.pop();
-                        }
-                        _ => {}
+                InputMode::Password => match key.code {
+                    KeyCode::Esc => {
+                        state.clear_fields();
+                        state.change_mode(InputMode::Normal)
                     }
-                }
+                    KeyCode::Char(c) => state.new_password.push(c),
+                    KeyCode::Backspace => {
+                        state.new_password.pop();
+                    }
+                    KeyCode::Tab => state.change_mode(InputMode::Submit),
+                    KeyCode::BackTab => state.change_mode(InputMode::Username),
+                    _ => {}
+                },
 
-                InputMode::Submit => {
-                    match key.code {
-                        KeyCode::Esc => {
-                            // exit from Title to Normal mode
-                        }
-                        KeyCode::BackTab => {
-                            // change mode to Password
-                        }
-                        _ => {}
+                InputMode::Submit => match key.code {
+                    KeyCode::Esc => {
+                        state.clear_fields();
+                        state.change_mode(InputMode::Normal)
                     }
-                }
+                    KeyCode::BackTab => state.change_mode(InputMode::Password),
+                    _ => {}
+                },
 
-                InputMode::Search => {
-                    match key.code {
-                        KeyCode::Esc => {
-                            // exit from Title to Normal mode
-                        }
-                        _ => {}
-                    }
-                }
+                InputMode::Search => match key.code {
+                    KeyCode::Esc => state.change_mode(InputMode::Normal),
+                    _ => {}
+                },
 
-                InputMode::List => {
-                    match key.code {
-                        KeyCode::Esc => {
-                            // exit from Title to Normal mode
-                        }
-                        _ => {}
-                    }
-                }
+                InputMode::List => match key.code {
+                    KeyCode::Esc => state.change_mode(InputMode::Normal),
+                    _ => {}
+                },
             }
         }
     }
