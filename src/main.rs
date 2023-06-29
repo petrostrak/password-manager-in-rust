@@ -1,5 +1,14 @@
+use std::error::Error;
+
+use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
+use crossterm::execute;
+use crossterm::terminal::{
+    disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
+};
+use tui::backend::{Backend, CrosstermBackend};
 use tui::text::Span;
 use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph};
+use tui::Terminal;
 
 const APP_KEYS_DESC: &str = r#"
 L:           List
@@ -41,6 +50,48 @@ struct PassMng {
     new_password: String,
 }
 
-fn main() {
-    println!("Hello, world!");
+impl PassMng {
+    pub fn new() -> Self {
+        PassMng {
+            mode: InputMode::Normal,
+            list_state: ListState::default(),
+            passwords: vec![],
+            search_text: String::new(),
+            search_list: vec![],
+            new_title: String::new(),
+            new_username: String::new(),
+            new_password: String::new(),
+        }
+    }
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let mut state = PassMng::new();
+
+    enable_raw_mode()?;
+    execute!(std::io::stdout(), EnterAlternateScreen, EnableMouseCapture)?;
+    let backend = CrosstermBackend::new(std::io::stdout());
+    let mut terminal = Terminal::new(backend)?;
+
+    let result = run_app(&mut terminal, &mut state);
+
+    disable_raw_mode()?;
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        DisableMouseCapture,
+    )?;
+
+    if let Err(e) = result {
+        println!("{}", e.to_string());
+    }
+
+    Ok(())
+}
+
+fn run_app<B: Backend>(
+    terminal: &mut Terminal<B>,
+    state: &mut PassMng,
+) -> Result<(), std::io::Error> {
+    loop {}
 }
