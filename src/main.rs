@@ -254,19 +254,6 @@ fn new_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng, area: Rect) {
     let desc = Paragraph::new(APP_KEYS_DESC);
     f.render_widget(desc, new_section_chunk[0]);
 
-    let password_input = Paragraph::new(state.new_password.to_owned())
-        .block(
-            Block::default()
-                .title("Password")
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded),
-        )
-        .style(match state.mode {
-            InputMode::Password => Style::default().fg(Color::Yellow),
-            _ => Style::default(),
-        });
-    f.render_widget(password_input, new_section_chunk[1]);
-
     let title_input = Paragraph::new(state.new_title.to_owned())
         .block(
             Block::default()
@@ -278,7 +265,7 @@ fn new_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng, area: Rect) {
             InputMode::Title => Style::default().fg(Color::Yellow),
             _ => Style::default(),
         });
-    f.render_widget(title_input, new_section_chunk[2]);
+    f.render_widget(title_input, new_section_chunk[1]);
 
     let username_input = Paragraph::new(state.new_username.to_owned())
         .block(
@@ -291,7 +278,20 @@ fn new_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng, area: Rect) {
             InputMode::Username => Style::default().fg(Color::Yellow),
             _ => Style::default(),
         });
-    f.render_widget(username_input, new_section_chunk[3]);
+    f.render_widget(username_input, new_section_chunk[2]);
+
+    let password_input = Paragraph::new(state.new_password.to_owned())
+        .block(
+            Block::default()
+                .title("Password")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded),
+        )
+        .style(match state.mode {
+            InputMode::Password => Style::default().fg(Color::Yellow),
+            _ => Style::default(),
+        });
+    f.render_widget(password_input, new_section_chunk[3]);
 
     let submit_btn = Paragraph::new("Submit")
         .alignment(Alignment::Center)
