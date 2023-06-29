@@ -115,64 +115,88 @@ fn run_app<B: Backend>(
                     KeyCode::Char('q') => {
                         return Ok(());
                     }
-                    KeyCode::Char('s') => state.change_mode(InputMode::Search),
-                    KeyCode::Char('l') => state.change_mode(InputMode::List),
-                    KeyCode::Insert => state.change_mode(InputMode::Title),
+                    KeyCode::Char('s') => {
+                        state.change_mode(InputMode::Search);
+                    }
+                    KeyCode::Char('l') => {
+                        state.change_mode(InputMode::List);
+                    }
+                    KeyCode::Insert => {
+                        state.change_mode(InputMode::Title);
+                    }
                     _ => {}
                 },
 
                 InputMode::Title => match key.code {
                     KeyCode::Esc => {
                         state.clear_fields();
-                        state.change_mode(InputMode::Normal)
+                        state.change_mode(InputMode::Normal);
                     }
-                    KeyCode::Char(c) => state.new_title.push(c),
+                    KeyCode::Char(c) => {
+                        state.new_title.push(c);
+                    }
                     KeyCode::Backspace => {
                         state.new_title.pop();
                     }
-                    KeyCode::Tab => state.change_mode(InputMode::Username),
+                    KeyCode::Tab => {
+                        state.change_mode(InputMode::Username);
+                    }
                     _ => {}
                 },
 
                 InputMode::Username => match key.code {
                     KeyCode::Esc => {
                         state.clear_fields();
-                        state.change_mode(InputMode::Normal)
+                        state.change_mode(InputMode::Normal);
                     }
-                    KeyCode::Char(c) => state.new_username.push(c),
+                    KeyCode::Char(c) => {
+                        state.new_username.push(c);
+                    }
                     KeyCode::Backspace => {
                         state.new_username.pop();
                     }
-                    KeyCode::Tab => state.change_mode(InputMode::Password),
-                    KeyCode::BackTab => state.change_mode(InputMode::Title),
+                    KeyCode::Tab => {
+                        state.change_mode(InputMode::Password);
+                    }
+                    KeyCode::BackTab => {
+                        state.change_mode(InputMode::Title);
+                    }
                     _ => {}
                 },
 
                 InputMode::Password => match key.code {
                     KeyCode::Esc => {
                         state.clear_fields();
-                        state.change_mode(InputMode::Normal)
+                        state.change_mode(InputMode::Normal);
                     }
-                    KeyCode::Char(c) => state.new_password.push(c),
+                    KeyCode::Char(c) => {
+                        state.new_password.push(c);
+                    }
                     KeyCode::Backspace => {
                         state.new_password.pop();
                     }
-                    KeyCode::Tab => state.change_mode(InputMode::Submit),
-                    KeyCode::BackTab => state.change_mode(InputMode::Username),
+                    KeyCode::Tab => {
+                        state.change_mode(InputMode::Submit);
+                    }
+                    KeyCode::BackTab => {
+                        state.change_mode(InputMode::Username);
+                    }
                     _ => {}
                 },
 
                 InputMode::Submit => match key.code {
                     KeyCode::Esc => {
                         state.clear_fields();
-                        state.change_mode(InputMode::Normal)
+                        state.change_mode(InputMode::Normal);
                     }
                     KeyCode::BackTab => state.change_mode(InputMode::Password),
                     _ => {}
                 },
 
                 InputMode::Search => match key.code {
-                    KeyCode::Esc => state.change_mode(InputMode::Normal),
+                    KeyCode::Esc => {
+                        state.change_mode(InputMode::Normal);
+                    }
                     KeyCode::Char(c) => {
                         state.search_text.push(c);
                     }
@@ -273,7 +297,6 @@ fn new_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng, area: Rect) {
         .alignment(Alignment::Center)
         .block(
             Block::default()
-                .title("Submit")
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded),
         )
