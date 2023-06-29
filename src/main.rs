@@ -1,6 +1,7 @@
 use std::error::Error;
 
-use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
+use crossterm::event::Event::Key;
+use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, KeyCode};
 use crossterm::execute;
 use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
@@ -8,7 +9,7 @@ use crossterm::terminal::{
 use tui::backend::{Backend, CrosstermBackend};
 use tui::text::Span;
 use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph};
-use tui::Terminal;
+use tui::{Frame, Terminal};
 
 const APP_KEYS_DESC: &str = r#"
 L:           List
@@ -93,5 +94,100 @@ fn run_app<B: Backend>(
     terminal: &mut Terminal<B>,
     state: &mut PassMng,
 ) -> Result<(), std::io::Error> {
-    loop {}
+    loop {
+        terminal.draw(|f| ui(f, state))?;
+
+        if let Key(key) = event::read()? {
+            match state.mode {
+                InputMode::Normal => {
+                    match key.code {
+                        KeyCode::Char('q') => {
+                            return Ok(());
+                        }
+                        KeyCode::Char('s') => {
+                            // search mode
+                        }
+                        KeyCode::Char('l') => {
+                            // list mode
+                        }
+                        KeyCode::Insert => {
+                            // insert mode
+                        }
+                        _ => {}
+                    }
+                }
+
+                InputMode::Title => {
+                    match key.code {
+                        KeyCode::Esc => {
+                            // exit from Title to Normal mode
+                        }
+                        KeyCode::Char(c) => state.new_title.push(c),
+                        KeyCode::Backspace => {
+                            state.new_title.pop();
+                        }
+                        _ => {}
+                    }
+                }
+
+                InputMode::Username => {
+                    match key.code {
+                        KeyCode::Esc => {
+                            // exit from Title to Normal mode
+                        }
+                        KeyCode::Char(c) => state.new_username.push(c),
+                        KeyCode::Backspace => {
+                            state.new_username.pop();
+                        }
+                        _ => {}
+                    }
+                }
+
+                InputMode::Password => {
+                    match key.code {
+                        KeyCode::Esc => {
+                            // exit from Title to Normal mode
+                        }
+                        KeyCode::Char(c) => state.new_password.push(c),
+                        KeyCode::Backspace => {
+                            state.new_password.pop();
+                        }
+                        _ => {}
+                    }
+                }
+
+                InputMode::Submit => {
+                    match key.code {
+                        KeyCode::Esc => {
+                            // exit from Title to Normal mode
+                        }
+                        KeyCode::BackTab => {
+                            // change mode to Password
+                        }
+                        _ => {}
+                    }
+                }
+
+                InputMode::Search => {
+                    match key.code {
+                        KeyCode::Esc => {
+                            // exit from Title to Normal mode
+                        }
+                        _ => {}
+                    }
+                }
+
+                InputMode::List => {
+                    match key.code {
+                        KeyCode::Esc => {
+                            // exit from Title to Normal mode
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+    }
 }
+
+fn ui<B: Backend>(f: &mut Frame<B>, state: &mut PassMng) {}
