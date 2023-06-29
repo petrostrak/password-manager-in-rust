@@ -7,7 +7,8 @@ use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
 };
 use tui::backend::{Backend, CrosstermBackend};
-use tui::layout::{Constraint, Direction, Layout};
+use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
+use tui::style::{Color, Style};
 use tui::text::Span;
 use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph};
 use tui::{Frame, Terminal};
@@ -116,7 +117,7 @@ fn run_app<B: Backend>(
                     }
                     KeyCode::Char('s') => state.change_mode(InputMode::Search),
                     KeyCode::Char('l') => state.change_mode(InputMode::List),
-                    KeyCode::Insert => state.change_mode(InputMode::Username),
+                    KeyCode::Insert => state.change_mode(InputMode::Title),
                     _ => {}
                 },
 
@@ -201,6 +202,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, state: &mut PassMng) {
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded);
     f.render_widget(new_section_block, parent_chunk[0]);
+    new_section(f, state, parent_chunk[0]);
 
     let list_section_block = Block::default()
         .title("List of passwords")
@@ -208,3 +210,78 @@ fn ui<B: Backend>(f: &mut Frame<B>, state: &mut PassMng) {
         .border_type(BorderType::Rounded);
     f.render_widget(list_section_block, parent_chunk[1]);
 }
+
+fn new_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng, area: Rect) {
+    let new_section_chunk = Layout::default()
+        .margin(2)
+        .direction(Direction::Vertical)
+        .constraints(
+            [
+                Constraint::Min(4),
+                Constraint::Length(3),
+                Constraint::Length(3),
+                Constraint::Length(3),
+                Constraint::Length(3),
+            ]
+            .as_ref(),
+        )
+        .split(area);
+
+    let desc = Paragraph::new(APP_KEYS_DESC);
+    f.render_widget(desc, new_section_chunk[0]);
+
+    let password_input = Paragraph::new(state.new_password.to_owned())
+        .block(
+            Block::default()
+                .title("Password")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded),
+        )
+        .style(match state.mode {
+            InputMode::Password => Style::default().fg(Color::Yellow),
+            _ => Style::default(),
+        });
+    f.render_widget(password_input, new_section_chunk[1]);
+
+    let title_input = Paragraph::new(state.new_title.to_owned())
+        .block(
+            Block::default()
+                .title("Title")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded),
+        )
+        .style(match state.mode {
+            InputMode::Title => Style::default().fg(Color::Yellow),
+            _ => Style::default(),
+        });
+    f.render_widget(title_input, new_section_chunk[2]);
+
+    let username_input = Paragraph::new(state.new_username.to_owned())
+        .block(
+            Block::default()
+                .title("Username")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded),
+        )
+        .style(match state.mode {
+            InputMode::Username => Style::default().fg(Color::Yellow),
+            _ => Style::default(),
+        });
+    f.render_widget(username_input, new_section_chunk[3]);
+
+    let submit_btn = Paragraph::new("Submit")
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .title("Submit")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded),
+        )
+        .style(match state.mode {
+            InputMode::Submit => Style::default().fg(Color::Yellow),
+            _ => Style::default(),
+        });
+    f.render_widget(submit_btn, new_section_chunk[4]);
+}
+
+fn list_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng) {}
