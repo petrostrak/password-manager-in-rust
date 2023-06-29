@@ -64,6 +64,16 @@ impl PassMng {
             new_password: String::new(),
         }
     }
+
+    pub fn change_mode(&mut self, mode: InputMode) {
+        self.mode = mode
+    }
+
+    pub fn clear_fields(&mut self) {
+        self.new_title.clear();
+        self.new_username.clear();
+        self.new_password.clear();
+    }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
