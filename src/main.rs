@@ -7,6 +7,7 @@ use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
 };
 use tui::backend::{Backend, CrosstermBackend};
+use tui::layout::{Constraint, Direction, Layout};
 use tui::text::Span;
 use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph};
 use tui::{Frame, Terminal};
@@ -189,4 +190,21 @@ fn run_app<B: Backend>(
     }
 }
 
-fn ui<B: Backend>(f: &mut Frame<B>, state: &mut PassMng) {}
+fn ui<B: Backend>(f: &mut Frame<B>, state: &mut PassMng) {
+    let parent_chunk = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+        .split(f.size());
+
+    let new_section_block = Block::default()
+        .title("New Password")
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded);
+    f.render_widget(new_section_block, parent_chunk[0]);
+
+    let list_section_block = Block::default()
+        .title("List of passwords")
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded);
+    f.render_widget(list_section_block, parent_chunk[1]);
+}
