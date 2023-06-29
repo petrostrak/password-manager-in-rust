@@ -171,6 +171,12 @@ fn run_app<B: Backend>(
 
                 InputMode::Search => match key.code {
                     KeyCode::Esc => state.change_mode(InputMode::Normal),
+                    KeyCode::Char(c) => {
+                        state.search_text.push(c);
+                    }
+                    KeyCode::Backspace => {
+                        state.search_text.pop();
+                    }
                     _ => {}
                 },
 
