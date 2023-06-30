@@ -46,4 +46,28 @@ impl Database {
             .collect();
         items
     }
+
+    pub fn insert(&self, password: &Password) {
+        self.conn
+            .execute(
+                "insert into passwords (title, username, password) values (?1, ?2, ?3)",
+                params![password.title, password.username, password.password],
+            )
+            .unwrap();
+    }
+
+    pub fn update(&self, id: usize, password: &Password) {
+        self.conn
+            .execute(
+                "update passwords set title=?1, username=?2, password=?3 where id=?4",
+                params![password.title, password.username, password.password, id],
+            )
+            .unwrap();
+    }
+
+    pub fn delete(&self, id: usize) {
+        self.conn
+            .execute("delete from passwords where id=?1", params![id])
+            .unwrap();
+    }
 }
