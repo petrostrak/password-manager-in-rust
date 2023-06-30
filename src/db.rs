@@ -28,4 +28,22 @@ impl Database {
         )?;
         Ok(())
     }
+
+    pub fn load(&self) -> Vec<Password> {
+        let mut statement = self.conn.prepare("select * from passwords").unwrap();
+        let items: Vec<Password> = statement
+            .query_map([], |row| {
+                let password = Password::new_with_id(
+                    row.get("id").unwrap(),
+                    row.get("title").unwrap(),
+                    row.get("username").unwrap(),
+                    row.get("password").unwrap(),
+                );
+                Ok(password)
+            })
+            .unwrap()
+            .map(|i| i.unwrap())
+            .collect();
+        items
+    }
 }
