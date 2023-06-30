@@ -18,3 +18,4 @@ Tab:         Go to next field
 Shift+Tab:   Go to previous filed
 Esc:         Exit insert mode
 ```
+![alt text](https://github.com/petrostrak/password-manager-in-rust/blob/main/passmng.png)
