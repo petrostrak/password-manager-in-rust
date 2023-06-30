@@ -543,7 +543,7 @@ fn list_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng, area: Rect) {
         .constraints([Constraint::Length(3), Constraint::Min(1)].as_ref())
         .split(area);
 
-    let search_input = Paragraph::new(state.search_text.to_owned())
+    let search_input = Paragraph::new(state.search_txt.to_owned())
         .block(
             Block::default()
                 .title("Search")
