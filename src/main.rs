@@ -247,8 +247,8 @@ impl PassMng {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut state = PassMng::new();
-
+    let passphrase = rpassword::prompt_password("Enter Passphrase: ").unwrap();
+    let mut state = PassMng::new(passphrase);
     enable_raw_mode()?;
     execute!(std::io::stdout(), EnterAlternateScreen, EnableMouseCapture)?;
     let backend = CrosstermBackend::new(std::io::stdout());
