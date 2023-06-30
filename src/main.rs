@@ -1,16 +1,20 @@
-use std::error::Error;
+mod db;
 
+use crate::db::Database;
+use arboard::Clipboard;
 use crossterm::event::Event::Key;
-use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, KeyCode};
-use crossterm::execute;
+use crossterm::event::{DisableMouseCapture, EnableMouseCapture, KeyCode};
 use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
 };
+use crossterm::{event, execute};
+use rusqlite::ErrorCode;
+use std::error::Error;
 use tui::backend::{Backend, CrosstermBackend};
 use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::text::Span;
-use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph};
+use tui::widgets::{Block, BorderType, Borders, Clear, List, ListItem, ListState, Paragraph};
 use tui::{Frame, Terminal};
 
 const APP_KEYS_DESC: &str = r#"
@@ -34,13 +38,35 @@ enum InputMode {
     Submit,
     Search,
     List,
+    Delete,
 }
 
 #[derive(Clone)]
-struct Password {
+pub struct Password {
+    id: usize,
     title: String,
     username: String,
     password: String,
+}
+
+impl Password {
+    pub fn new(title: String, username: String, password: String) -> Password {
+        Password {
+            id: 0,
+            title,
+            username,
+            password,
+        }
+    }
+
+    pub fn new_with_id(id: usize, title: String, username: String, password: String) -> Password {
+        Password {
+            id,
+            title,
+            username,
+            password,
+        }
+    }
 }
 
 struct PassMng {
