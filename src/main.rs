@@ -357,9 +357,15 @@ fn run_app<B: Backend>(
                         state.clear_fields();
                         state.change_mode(InputMode::Normal);
                     }
-                    KeyCode::BackTab => state.change_mode(InputMode::Password),
+                    KeyCode::BackTab => {
+                        state.change_mode(InputMode::Password);
+                    }
                     KeyCode::Enter => {
-                        state.insert();
+                        if state.edit_mode {
+                            state.edit();
+                        } else {
+                            state.insert();
+                        }
                     }
                     _ => {}
                 },
@@ -369,18 +375,49 @@ fn run_app<B: Backend>(
                         state.change_mode(InputMode::Normal);
                     }
                     KeyCode::Char(c) => {
-                        state.search_text.push(c);
+                        state.search_txt.push(c);
                         state.search();
                     }
                     KeyCode::Backspace => {
-                        state.search_text.pop();
+                        state.search_txt.pop();
                         state.search();
                     }
                     _ => {}
                 },
 
                 InputMode::List => match key.code {
-                    KeyCode::Esc => state.change_mode(InputMode::Normal),
+                    KeyCode::Esc => {
+                        state.list_state.select(None);
+                        state.change_mode(InputMode::Normal);
+                    }
+                    KeyCode::Up => {
+                        state.move_up();
+                    }
+                    KeyCode::Down => {
+                        state.move_down();
+                    }
+                    KeyCode::Char('u') => {
+                        state.copy_username();
+                    }
+                    KeyCode::Char('p') => {
+                        state.copy_password();
+                    }
+                    KeyCode::Char('e') => {
+                        state.start_edit_mode();
+                    }
+                    KeyCode::Char('d') => {
+                        state.check_delete();
+                    }
+                    _ => {}
+                },
+
+                InputMode::Delete => match key.code {
+                    KeyCode::Char('n') => {
+                        state.change_mode(InputMode::List);
+                    }
+                    KeyCode::Char('y') => {
+                        state.delete();
+                    }
                     _ => {}
                 },
             }
