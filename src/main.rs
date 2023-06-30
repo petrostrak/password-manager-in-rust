@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::fmt::format;
 
 use crossterm::event::Event::Key;
 use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, KeyCode};
@@ -341,7 +340,6 @@ fn list_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng, area: Rect) {
     } else {
         state.search_list.to_owned()
     };
-
     let items: Vec<ListItem> = list_to_show
         .into_iter()
         .map(|item| match state.mode {
@@ -349,7 +347,7 @@ fn list_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng, area: Rect) {
                 "{}: {} - {}",
                 item.title.to_owned(),
                 item.username.to_owned(),
-                item.password.to_owned(),
+                item.password.to_owned()
             )),
             _ => ListItem::new(Span::from(item.title)),
         })
@@ -361,20 +359,22 @@ fn list_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng, area: Rect) {
         .constraints([Constraint::Length(3), Constraint::Min(1)].as_ref())
         .split(area);
 
-    let search_input = Paragraph::new(state.search_text.to_owned()).block(
-        Block::default()
-            .title("Search")
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .style(match state.mode {
-                InputMode::Search => Style::default().fg(Color::Yellow),
-                _ => Style::default(),
-            }),
-    );
+    let search_input = Paragraph::new(state.search_text.to_owned())
+        .block(
+            Block::default()
+                .title("Search")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded),
+        )
+        .style(match state.mode {
+            InputMode::Search => Style::default().fg(Color::Yellow),
+            _ => Style::default(),
+        });
+    f.render_widget(search_input, list_chunks[0]);
 
     let list = List::new(items)
         .block(Block::default())
         .highlight_symbol("->")
         .highlight_style(Style::default().add_modifier(Modifier::BOLD));
-    f.render_stateful_widget(list, list_chunks[1], &mut state.list_state)
+    f.render_stateful_widget(list, list_chunks[1], &mut state.list_state);
 }
