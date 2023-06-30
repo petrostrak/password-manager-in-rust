@@ -89,6 +89,15 @@ impl PassMng {
         self.clear_fields();
         self.change_mode(InputMode::Normal);
     }
+
+    pub fn search(&mut self) {
+        self.search_list = self
+            .passwords
+            .clone()
+            .into_iter()
+            .filter(|item| item.title.starts_with(&self.search_text.to_owned()))
+            .collect();
+    }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -203,6 +212,9 @@ fn run_app<B: Backend>(
                         state.change_mode(InputMode::Normal);
                     }
                     KeyCode::BackTab => state.change_mode(InputMode::Password),
+                    KeyCode::Enter => {
+                        state.insert();
+                    }
                     _ => {}
                 },
 
@@ -212,9 +224,11 @@ fn run_app<B: Backend>(
                     }
                     KeyCode::Char(c) => {
                         state.search_text.push(c);
+                        state.search();
                     }
                     KeyCode::Backspace => {
                         state.search_text.pop();
+                        state.search();
                     }
                     _ => {}
                 },
