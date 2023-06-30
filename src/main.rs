@@ -259,7 +259,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, state: &mut PassMng) {
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded);
     f.render_widget(list_section_block, parent_chunk[1]);
-    list_section(f, state, parent_chunk[0]);
+    list_section(f, state, parent_chunk[1]);
 }
 
 fn new_section<B: Backend>(f: &mut Frame<B>, state: &mut PassMng, area: Rect) {
