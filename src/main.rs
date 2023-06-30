@@ -14,7 +14,7 @@ use tui::backend::{Backend, CrosstermBackend};
 use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::text::Span;
-use tui::widgets::{Block, BorderType, Borders, Clear, List, ListItem, ListState, Paragraph};
+use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph};
 use tui::{Frame, Terminal};
 
 const APP_KEYS_DESC: &str = r#"
