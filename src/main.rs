@@ -70,32 +70,51 @@ impl Password {
 }
 
 struct PassMng {
+    db: Database,
     mode: InputMode,
     list_state: ListState,
     passwords: Vec<Password>,
-    search_text: String,
+    search_txt: String,
     search_list: Vec<Password>,
     new_title: String,
     new_username: String,
     new_password: String,
+    edit_mode: bool,
+    edit_index: Option<usize>,
 }
 
 impl PassMng {
-    pub fn new() -> Self {
+    pub fn new(key: String) -> PassMng {
+        let db = match Database::new(key) {
+            Ok(db) => db,
+            Err(e) => {
+                if e.sqlite_error_code().unwrap() == ErrorCode::NotADatabase {
+                    println!("passphrase is not valid!");
+                    std::process::exit(1);
+                } else {
+                    println!("{}", e.to_string());
+                    std::process::exit(1);
+                }
+            }
+        };
+        let passwords = db.load();
         PassMng {
+            db,
             mode: InputMode::Normal,
             list_state: ListState::default(),
-            passwords: vec![],
-            search_text: String::new(),
+            passwords,
+            search_txt: String::new(),
             search_list: vec![],
             new_title: String::new(),
             new_username: String::new(),
             new_password: String::new(),
+            edit_mode: false,
+            edit_index: None,
         }
     }
 
     pub fn change_mode(&mut self, mode: InputMode) {
-        self.mode = mode
+        self.mode = mode;
     }
 
     pub fn clear_fields(&mut self) {
@@ -105,14 +124,69 @@ impl PassMng {
     }
 
     pub fn insert(&mut self) {
-        let password = Password {
-            title: self.new_title.to_owned(),
-            username: self.new_username.to_owned(),
-            password: self.new_password.to_owned(),
-        };
+        let password = Password::new(
+            self.new_title.to_owned(),
+            self.new_username.to_owned(),
+            self.new_password.to_owned(),
+        );
+        self.db.insert(&password);
         self.passwords.push(password);
         self.clear_fields();
         self.change_mode(InputMode::Normal);
+    }
+
+    pub fn start_edit_mode(&mut self) {
+        if let Some(index) = self.list_state.selected() {
+            let password = &self.passwords[index];
+            self.new_title = password.title.to_owned();
+            self.new_username = password.username.to_owned();
+            self.new_password = password.password.to_owned();
+            self.edit_mode = true;
+            self.edit_index = Some(index);
+            self.change_mode(InputMode::Title);
+        }
+    }
+
+    pub fn edit(&mut self) {
+        let index = self.edit_index.unwrap();
+        let id = self.passwords[index].id;
+        let password = Password::new(
+            self.new_title.to_owned(),
+            self.new_username.to_owned(),
+            self.new_password.to_owned(),
+        );
+        self.db.update(id, &password);
+        self.passwords[index] = password;
+        self.clear_fields();
+        self.end_edit_mode();
+        self.change_mode(InputMode::List);
+    }
+
+    pub fn end_edit_mode(&mut self) {
+        if self.edit_mode {
+            self.edit_mode = false;
+            self.edit_index = None;
+        }
+    }
+
+    pub fn check_delete(&mut self) {
+        if self.list_state.selected().is_some() {
+            self.change_mode(InputMode::Delete);
+        }
+    }
+
+    pub fn delete(&mut self) {
+        if let Some(index) = self.list_state.selected() {
+            let id = self.passwords[index].id;
+            self.passwords.remove(index);
+            self.db.delete(id);
+            if index > 0 {
+                self.list_state.select(Some(0));
+            } else {
+                self.list_state.select(None);
+            }
+            self.change_mode(InputMode::List);
+        }
     }
 
     pub fn search(&mut self) {
@@ -120,8 +194,55 @@ impl PassMng {
             .passwords
             .clone()
             .into_iter()
-            .filter(|item| item.title.starts_with(&self.search_text.to_owned()))
+            .filter(|item| item.title.starts_with(&self.search_txt.to_owned()))
             .collect();
+    }
+
+    pub fn move_up(&mut self) {
+        let selected = match self.list_state.selected() {
+            Some(v) => {
+                if v == 0 {
+                    Some(v)
+                } else {
+                    Some(v - 1)
+                }
+            }
+            None => Some(0),
+        };
+        self.list_state.select(selected);
+    }
+
+    pub fn move_down(&mut self) {
+        let selected = match self.list_state.selected() {
+            Some(v) => {
+                if v == self.passwords.len() - 1 {
+                    Some(v)
+                } else {
+                    Some(v + 1)
+                }
+            }
+            None => Some(0),
+        };
+        self.list_state.select(selected);
+    }
+
+    pub fn copy_username(&self) {
+        if let Some(index) = self.list_state.selected() {
+            let username = self.passwords[index].username.to_owned();
+            PassMng::copy(username);
+        }
+    }
+
+    pub fn copy_password(&self) {
+        if let Some(index) = self.list_state.selected() {
+            let password = self.passwords[index].password.to_owned();
+            PassMng::copy(password);
+        }
+    }
+
+    fn copy(content: String) {
+        let mut clipboard = Clipboard::new().unwrap();
+        clipboard.set_text(content).unwrap();
     }
 }
 
